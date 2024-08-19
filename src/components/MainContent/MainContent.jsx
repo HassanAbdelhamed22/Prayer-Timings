@@ -4,8 +4,24 @@ import { CssBaseline, Divider } from "@mui/material";
 import PrayersCards from "../PrayersCards/PrayersCards";
 import SelectCity from "../SelectCity/SelectCity";
 import moment from "moment";
-import "moment/dist/locale/ar-kw";
+import "moment/dist/locale/ar";
 
+moment.updateLocale("ar", {
+  months: [
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
+  ],
+});
 
 moment.locale("ar");
 
@@ -81,25 +97,18 @@ export default function MainContent() {
     setNextPrayerIndex(prayerIndex);
 
     const nextPrayerObject = prayersArray[prayerIndex];
-    const nextPrayerTime = timings[nextPrayerObject.key];
-    const nextPrayerTimeMoment = moment(nextPrayerTime, "hh:mm");
+    let nextPrayerTimeMoment = moment(timings[nextPrayerObject.key], "hh:mm");
 
-    let remainingTime = moment(nextPrayerTime, "hh:mm").diff(momentNow);
-
-    if (remainingTime > 0) {
-      const midnightDiff = moment("23:59:59", "hh:mm:ss").diff(momentNow);
-
-      const fajrToMidnightDiff = nextPrayerTimeMoment.diff(
-        moment("00:00:00", "hh:mm:ss")
-      );
-      const totalDifference = midnightDiff + fajrToMidnightDiff;
-
-      remainingTime = totalDifference;
+    // If the next prayer time is before the current time, add one day
+    if (nextPrayerTimeMoment.isBefore(momentNow)) {
+      nextPrayerTimeMoment = nextPrayerTimeMoment.add(1, "days");
     }
 
+    const remainingTime = nextPrayerTimeMoment.diff(momentNow);
     const durationRemainingTime = moment.duration(remainingTime);
 
     setRemainingTimeState(
+      // `${durationRemainingTime.hours()} : ${durationRemainingTime.minutes()} : ${durationRemainingTime.seconds()}`
       `${durationRemainingTime.seconds()} : ${durationRemainingTime.minutes()} : ${durationRemainingTime.hours()}`
     );
   };
